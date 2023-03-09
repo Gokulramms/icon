@@ -39,8 +39,13 @@ countA=0
 countD=0
 countM=0
 countJ=0
-ans=f'''HELLO MR/MRS {name} , THANKYOU FOR WISITING OUR WEBSITE.
-SHARE THIS WEBSITE TO YOUR FRIENDS SO THAT THEY CAN ABLE TO GET CLARIFY ON THIER CAREER.'''
+ans=f'''HELLO MR/MRS {name} , THANKYOU FOR VISITING OUR WEBSITE.KINDLY
+SHARE THIS TO YOUR FRIENDS SO THAT THEY CAN ABLE TO GET CLARIFY ON THIER CAREER.
+
+URL: url:https://gokulramms-icon-pro-grur1i.streamlit.app/
+
+THANK YOU!{name}
+'''
 #USER INPUT OPTION
 df = pd.DataFrame({
 	'option':["Yes","No"]
@@ -134,9 +139,9 @@ if st.checkbox("Let's Begin:"):
 								
 								st.title('''Related Pathways--> Health Service,Public and Human Services''')
 								health=load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_ssjAlSigs7.json")
-								#st_lottie(health, key="Health")
+								
 								nat=load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_ocyegDP2iy.json")
-								#st_lottie(nat, key="Natural resources ")
+								
 		
 								
 							elif max==countM:
@@ -169,4 +174,4 @@ if st.checkbox("Let's Begin:"):
 							text=message.as_string()
 							session.sendmail(send,rec,text)
 							session.quit()
-							st.subheader('Mail sent')
+							st.subheader('           Mail Sent            ')
