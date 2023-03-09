@@ -1,5 +1,6 @@
 streamlit
 pip install streamlit_lottie
+pip==23.0.1
 pandas
 requests
 json 
