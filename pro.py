@@ -1,5 +1,3 @@
-!pip install streamlit_lottie
-import streamlit_lottie
 import streamlit as st
 import pandas as pd
 import json 
