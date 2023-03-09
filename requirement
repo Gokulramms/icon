@@ -6,4 +6,3 @@ json
 smtplib
 MIMEMultipart
 MIMEText
-streamlit-lottie==0.0.3
