@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import json 
 import requests
-from streamlit_lottie import st_lottie
+#from streamlit_lottie import st_lottie
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -14,7 +14,7 @@ def load_lottieurl(url:str):
 	return r.json()
 
 glob=load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_s8okgady.json")
-st_lottie(glob,key="___")
+#st_lottie(glob,key="___")
 st.title("WHICH CAREER IS BEST FOR YOU...?")
 
 #SET OF QUESTION AS LIST
@@ -111,49 +111,49 @@ if st.checkbox("Let's Begin:"):
 								
 								st.title('''Related Pathways--> Natural Resources,Health Services,Industrial and Engineering Technolog''')
 								nat=load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_ocyegDP2iy.json")
-								st_lottie(nat, key="Natural Resources")
+								#st_lottie(nat, key="Natural Resources")
 								ind=load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_dj2iGEFiUX.json")
-								st_lottie(ind, key="Industry field")
+								#st_lottie(ind, key="Industry field")
 								
 							elif max==countK:
 							
 								st.title('''Related Pathways--> Health Services,Business,Public and Human Service''')
 								health=load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_ssjAlSigs7.json")
-								st_lottie(health, key="Health")
+								#st_lottie(health, key="Health")
 								buisness=load_lottieurl("https://assets6.lottiefiles.com/private_files/lf30_jui5y7ab.json")
-								st_lottie(buisness, key="Buisness ")
+								#st_lottie(buisness, key="Buisness ")
 							elif max==countA:
 							
 								st.title('''Related Pathways--> Public and Human Services,Arts and Communication''')
 								public=load_lottieurl("https://assets6.lottiefiles.com/packages/lf20_fUq9u8VGIo.json")
-								st_lottie(public, key=="Public ")
+								#st_lottie(public, key=="Public ")
 								arts=load_lottieurl("https://assets7.lottiefiles.com/packages/lf20_iqhd0uv0.json")
-								st_lottie(arts, key=" Arts")
+								#st_lottie(arts, key=" Arts")
 								
 							elif max==countD:
 								
 								st.title('''Related Pathways--> Health Service,Public and Human Services''')
 								health=load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_ssjAlSigs7.json")
-								st_lottie(health, key="Health")
+								#st_lottie(health, key="Health")
 								nat=load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_ocyegDP2iy.json")
-								st_lottie(nat, key="Natural resources ")
+								#st_lottie(nat, key="Natural resources ")
 		
 								
 							elif max==countM:
 								
 								st.title('''Related Pathways--> Buisness,Arts and Communication''')
 								buisness=load_lottieurl("https://assets6.lottiefiles.com/private_files/lf30_jui5y7ab.json")
-								st_lottie(buisness, key="Buisness ")
+								#st_lottie(buisness, key="Buisness ")
 								communication=load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_jvj9d2lc.json")
-								st_lottie(communication, key=" Communication")
+								#st_lottie(communication, key=" Communication")
 								
 							else:
 							
 								st.title('''Related Pathways--> Health Services,Business,Industrial and Engineering ,Technology''')
 								eng=load_lottieurl("https://assets7.lottiefiles.com/packages/lf20_ic7oz9ip.json")
-								st_lottie(eng, key=" Engineering")
+								#st_lottie(eng, key=" Engineering")
 								ind=load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_dj2iGEFiUX.json")
-								st_lottie(ind, key="Industry field ")
+								#st_lottie(ind, key="Industry field ")
 
 							send='iconcreationai81@gmail.com'
 							pas='tetkkfrshnidygvq'
