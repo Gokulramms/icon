@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import json 
 import requests
+import pillow
 #from streamlit_lottie import st_lottie
 import smtplib
 from email.mime.multipart import MIMEMultipart
