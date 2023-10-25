@@ -1,177 +1,168 @@
 import streamlit as st
+import mysql.connector
 import pandas as pd
-import json 
-import requests
-#from streamlit_lottie import st_lottie
+import random
+import string
+from datetime import datetime
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-def load_lottieurl(url:str):
-	r= requests.get(url)
-	if r.status_code != 200:
-		return None
-	return r.json()
+# Function to connect to the database
+def connect_to_database():
+    try:
+        conn = mysql.connector.connect(
+            host="localhost",  # Replace with your MySQL server host
+            user="root",       # Replace with your MySQL username
+            password="Gokul@sgr123",  # Replace with your MySQL password
+            database="firstproject"  # Replace with your MySQL database name
+        )
+        c = conn.cursor()
+        return conn, c
+    except mysql.connector.Error as e:
+        st.error(f"Error connecting to the database: {e}")
+        st.stop()
 
-glob=load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_s8okgady.json")
-#st_lottie(glob,key="___")
-st.title("WHICH CAREER IS BEST FOR YOU...?")
+# Function to create the "students_of_toh" table if it doesn't exist
+def create_table_if_not_exists(c):
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS students_of_toh (
+            rollno VARCHAR(10) NOT NULL,
+            name VARCHAR(45) NOT NULL,
+            kit_no TEXT(10) NOT NULL,
+            date DATE NOT NULL,
+            mail TEXT(25) NOT NULL,
+            year INT NOT NULL,
+            PRIMARY KEY (rollno)
+        )
+    """)
 
-#SET OF QUESTION AS LIST
-G=["I like to work on cars : ","I like to build things : ","I like to do experiments : ","I like to take care of animals : ","I like to cook : ","I am a practical person : ","I like working outdoors : "]
-K=["I like to do puzzles : ","I like to do experiments : ","I enjoy science : "," I enjoy trying to figure out how thinks work: "," I like to analyze things (problems\situations):","I like working with numbersor charts : "," I’m good at math : "]
-A=["I am good at working independently : "," I like to read about art and music : ","I enjoy creative writing : ","I am a creative person : ","I like to play instruments or sing : ","I like acting in plays : ","I like to draw : "]
-D=["I like to work in teams : ","I like to teach or train people : ","I like trying to help people solve their problems : ","I am interested in healing people : ","I enjoy learning about other cultures : ","I like to get into discussions about issues : ","I like helping people : "]
-M=["I am an ambitious person(I set goals for myself):"," I like to try to influence or persuade people : ","I like selling things : ","I am quick to take on new responsibilities : ","I would like to start my own business: ","I like to lead: "]
-J=[" I like to organize things(files, desks/offices): ","I like to have clear instructions to follow: ","I wouldn’t mind working 8 hours per day in an office: ","I pay attention to details: ","I like to do filing or typing : ","I am good at keeping records of my work: "," I would like to work in an office :"]
-st.write("*"*70)
-st.header("Hello Guys Welcome to our project")
-st.write("*"*70)
-name=st.text_input('Enter your Name: ',' ')
-gmail=st.text_input('Enter your Email:',' ')
-Age=st.slider('How old are you?', 10, 100, 18)
-st.subheader("\nIf you are interest in the content of the question , select 'Yes' or 'No'")
+# Function to add a student to the database
+def add_student(rollno, name, kitno, date, mail, year):
+    try:
+        c.execute("INSERT INTO students_of_toh (rollno, name, kit_no, date, mail, year) VALUES (%s, %s, %s, %s, %s, %s)", (rollno, name, kitno, date, mail, year))
+        conn.commit()
+        return True
+    except mysql.connector.Error as e:
+        st.error(f"Error adding student to the database: {e}")
+        return False
 
-current=[]
-countG=0
-countK=0
-countA=0
-countD=0
-countM=0
-countJ=0
-ans=f'''HELLO MR/MRS {name} , THANKYOU FOR VISITING OUR WEBSITE.KINDLY
-SHARE THIS TO YOUR FRIENDS SO THAT THEY CAN ABLE TO GET CLARIFY ON THIER CAREER.
+# Function to remove a student from the database
+def remove_student(rollno):
+    try:
+        c.execute("DELETE FROM students_of_toh WHERE rollno=%s", (rollno,))
+        conn.commit()
+        if c.rowcount > 0:
+            return True
+        else:
+            return False
+    except mysql.connector.Error as e:
+        st.error(f"Error removing student from the database: {e}")
+        return False
 
-URL: url:https://gokulramms-icon-pro-grur1i.streamlit.app/
+# Home Page
+def home_page():
+    st.header("Tower Of Hanoi Management")
+    options = ["ISSUING", "RETURNING", "STUDENT LIST"]
+    choice = st.sidebar.selectbox("Select an option", options)
 
-THANK YOU!{name}
-'''
-#USER INPUT OPTION
-df = pd.DataFrame({
-	'option':["Yes","No"]
-	})
+    if choice == "ISSUING":
+        issuing_page()
+    elif choice == "RETURNING":
+        returning_page()
+    elif choice == "STUDENT LIST":
+        student_list_page()
 
-if st.checkbox("Let's Begin:"):
+# Issuing Page
+def issuing_page():
+    st.header("ISSUING")
+    col0, col1, col2, col3 = st.columns(4)
+    col4, col5 = st.columns(2)
+    roll = col0.text_input("Roll No:")
+    name_input = col1.text_input("Name:")
+    age_input = col2.text_input("TOH NUMBER:")
+    date_input = col3.date_input("Date")
+    mail = col4.text_input("ENTER STUDENT EMAIL:")
+    year = col5.text_input("Enter Your Year:")
+    add_button = st.button("SUBMIT")
 
-	for i in G:#GETTING ANSWER FORM THE USER 
-		oppr=st.selectbox(
-			i,
-			df['option']
-		)
-		if oppr=="Yes":   # IF THE ANSWER IS TRUE BELOW CODE EXECUTED
-			countG=countG+1  #INCRIMENT COUNT_R WITH ONE
-		current.append(countG) #APPENDING COUNT TO CURRENT LIST
-	if st.checkbox("Next-->"):
+    if add_button and name_input and age_input and date_input:
+        # Check if the name already exists in the database
+        c.execute("SELECT COUNT(*) FROM students_of_toh WHERE name=%s", (name_input,))
+        result = c.fetchone()
+        if result[0] > 0:
+            st.warning("Student with the given name already exists!")
+        else:
+            date_str = date_input.strftime("%Y-%m-%d")
+            age_input = int(age_input)  # Convert to int
+            if add_student(roll, name_input, age_input, date_str, mail, year):
+                st.success("Student added successfully!")
 
-		for i in K:
-			I_opp=st.radio(
-				i,
-				df['option']
-			)
-			if I_opp=="Yes":
-				countK=countK+1    #INCRIMENT COUNT_I WITH ONE
-			current.append(countK)  #APPENDING COUNT TO CURRENT LIST
-		if st.checkbox("Next->"):
+                # Sending email to the student
+                send = 'iconcreationai81@gmail.com'
+                pas = 'tetkkfrshnidygvq'
+                rec = mail
+                message = MIMEMultipart()
+                message['From'] = send
+                message['To'] = rec
+                message['Subject'] = 'TOWER OF HANOI MANAGEMENT'
+                ans = f'''Hello {name_input}... That you are getting a tower of hanoi kit from the office. Your kit number is {age_input}
+so keep the kit safe and use it in an efficient manner.
 
-			for i in A:
-				oppa=st.radio(
-					i,
-					df['option']
-				)
-				if oppa=="Yes":
-					countA=countA+1    #INCRIMENT COUNT_A WITH ONE
-				current.append(countA)  #APPENDING COUNT TO CURRENT LIST
-			if st.checkbox(" Next-->"):
+                Thank you...
+                From:
+                Tower Of Hanoi Management Team
+                {date_input}'''
 
-				for i in D:
-					opps=st.radio(
-						i,
-						df['option']
-					)
-					if opps=="Yes":
-						countD=countD+1    #INCRIMENT COUNT_S WITH ONE
-					current.append(countD)  #APPENDING COUNT TO CURRENT LIST
-				if st.checkbox("Next--> "):
-					for i in M:
-						oppc=st.radio(
-							i,
-							df['option']
-						)
-						if oppc=="Yes":
-							countM=countM+1   #INCRIMENT COUNT_C WITH ONE
-						current.append(countM) #APPENDING COUNT TO CURRENT LIST
-					if st.checkbox("Next-->  "):
-						for i in J:
-							oppe=st.radio(
-								i,
-								df['option']
-							)
-							if oppe=="Yes":
-								countJ=countJ+1   #INCRIMENT COUNT_E WITH ONE
-							current.append(countJ)  #APPENDING COUNT TO CURRENT LIST
+                message.attach(MIMEText(ans, 'plain'))
+                session = smtplib.SMTP('smtp.gmail.com', 587)
+                session.starttls()
+                session.login(send, pas)
+                text = message.as_string()
+                session.sendmail(send, rec, text)
+                session.quit()
+                st.subheader('Mail sent to Student')
 
-						if st.button("Get Your Result-->"):
-							max=max(current)
-							if max==countG :
-								
-								st.title('''Related Pathways--> Natural Resources,Health Services,Industrial and Engineering Technolog''')
-								nat=load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_ocyegDP2iy.json")
-								#st_lottie(nat, key="Natural Resources")
-								ind=load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_dj2iGEFiUX.json")
-								#st_lottie(ind, key="Industry field")
-								
-							elif max==countK:
-							
-								st.title('''Related Pathways--> Health Services,Business,Public and Human Service''')
-								health=load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_ssjAlSigs7.json")
-								#st_lottie(health, key="Health")
-								buisness=load_lottieurl("https://assets6.lottiefiles.com/private_files/lf30_jui5y7ab.json")
-								#st_lottie(buisness, key="Buisness ")
-							elif max==countA:
-							
-								st.title('''Related Pathways--> Public and Human Services,Arts and Communication''')
-								public=load_lottieurl("https://assets6.lottiefiles.com/packages/lf20_fUq9u8VGIo.json")
-								#st_lottie(public, key=="Public ")
-								arts=load_lottieurl("https://assets7.lottiefiles.com/packages/lf20_iqhd0uv0.json")
-								#st_lottie(arts, key=" Arts")
-								
-							elif max==countD:
-								
-								st.title('''Related Pathways--> Health Service,Public and Human Services''')
-								health=load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_ssjAlSigs7.json")
-								
-								nat=load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_ocyegDP2iy.json")
-								
-		
-								
-							elif max==countM:
-								
-								st.title('''Related Pathways--> Buisness,Arts and Communication''')
-								buisness=load_lottieurl("https://assets6.lottiefiles.com/private_files/lf30_jui5y7ab.json")
-								#st_lottie(buisness, key="Buisness ")
-								communication=load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_jvj9d2lc.json")
-								#st_lottie(communication, key=" Communication")
-								
-							else:
-							
-								st.title('''Related Pathways--> Health Services,Business,Industrial and Engineering ,Technology''')
-								eng=load_lottieurl("https://assets7.lottiefiles.com/packages/lf20_ic7oz9ip.json")
-								#st_lottie(eng, key=" Engineering")
-								ind=load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_dj2iGEFiUX.json")
-								#st_lottie(ind, key="Industry field ")
+# Returning Page
+def returning_page():
+    st.header("RETURNING")
+    roll_no_to_del = st.text_input("Enter the Roll No of the student:")
+    remove_button = st.button("REMOVE")
 
-							send='iconcreationai81@gmail.com'
-							pas='tetkkfrshnidygvq'
-							rec=gmail
-							message=MIMEMultipart()
-							message['From']=send
-							message['To']=rec
-							message['Subject']='WHICH CAREER IS BEST FOR YOU...'
-							message.attach(MIMEText(ans,'plain'))
-							session=smtplib.SMTP('smtp.gmail.com',587)
-							session.starttls()
-							session.login(send,pas)
-							text=message.as_string()
-							session.sendmail(send,rec,text)
-							session.quit()
-							st.subheader('           Mail Sent            ')
+    if remove_button and roll_no_to_del:
+        if remove_student(roll_no_to_del):
+            st.warning("Student removed successfully!")
+        else:
+            st.error("Student with the given name not found.")
+
+# Student List Page
+def student_list_page():
+    st.header("Student List")
+    c.execute("SELECT rollno, name, kit_no, date, mail, year FROM students_of_toh")
+    persons = c.fetchall()
+    if persons:
+        df = pd.DataFrame(persons, columns=["RollNo", "Name", "KIT NO:", "Date", "Mail", "Year"])
+        st.dataframe(df)
+    else:
+        st.info("No Students found.")
+
+# Login Function
+def login():
+    st.title("Tower Of Hanoi Management Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        # Replace with your actual login credentials
+        if username == "Kitestaff" and password == "kite@123":
+            st.success("Login successful!")
+            home_page()
+        else:
+            st.error("Invalid credentials. Please try again.")
+
+# Main Function
+if __name__ == "__main__":
+    conn, c = connect_to_database()
+    create_table_if_not_exists(c)
+    login()
+    conn.close()
